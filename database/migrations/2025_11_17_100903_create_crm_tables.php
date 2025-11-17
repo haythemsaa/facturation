@@ -165,7 +165,7 @@ return new class extends Migration
             $table->date('end_date');
             $table->decimal('target_amount', 12, 3)->default(0); // Objectif CA
             $table->integer('target_deals')->default(0); // Objectif nombre d'affaires
-            $table->decimal('achieved_amount', 12, 3')->default(0); // CA réalisé
+            $table->decimal('achieved_amount', 12, 3)->default(0); // CA réalisé
             $table->integer('achieved_deals')->default(0); // Nombre d'affaires réalisées
             $table->timestamps();
 
