@@ -2,6 +2,8 @@
 namespace App\Http\Controllers\Api\HR;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\HR\StorePayslipRequest;
+use App\Http\Resources\HR\PayslipResource;
 use App\Models\Payslip;
 use App\Services\Compliance\PayrollCalculator;
 use Illuminate\Http\Request;
@@ -37,19 +39,12 @@ class PayslipController extends Controller
 
         $payslips = $query->latest('year')->latest('month')->paginate($request->per_page ?? 15);
 
-        return response()->json($payslips);
+        return PayslipResource::collection($payslips);
     }
 
-    public function store(Request $request)
+    public function store(StorePayslipRequest $request)
     {
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'month' => 'required|integer|min:1|max:12',
-            'year' => 'required|integer|min:2020|max:2100',
-            'worked_days' => 'required|integer|min:0|max:31',
-            'earnings' => 'nullable|array',
-            'deductions' => 'nullable|array',
-        ]);
+        $validated = $request->validated();
 
         $employee = \App\Models\Employee::findOrFail($validated['employee_id']);
 
@@ -100,12 +95,12 @@ class PayslipController extends Controller
             'details' => $payslipData,
         ]);
 
-        return response()->json($payslip->load('employee'), 201);
+        return new PayslipResource($payslip->load('employee'));
     }
 
     public function show(Payslip $payslip)
     {
-        return response()->json($payslip->load('employee.department', 'employee.position', 'lines'));
+        return new PayslipResource($payslip->load('employee.department', 'employee.position', 'lines'));
     }
 
     public function destroy(Payslip $payslip)

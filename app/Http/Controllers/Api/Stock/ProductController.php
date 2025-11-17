@@ -2,6 +2,9 @@
 namespace App\Http\Controllers\Api\Stock;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Stock\StoreProductRequest;
+use App\Http\Requests\Stock\UpdateProductRequest;
+use App\Http\Resources\Stock\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -29,60 +32,26 @@ class ProductController extends Controller
 
         $products = $query->paginate($request->per_page ?? 15);
 
-        return response()->json($products);
+        return ProductResource::collection($products);
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'code' => 'required|string|unique:products,code',
-            'barcode' => 'nullable|string|unique:products,barcode',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'category_id' => 'nullable|exists:categories,id',
-            'type' => 'required|in:product,service',
-            'unit' => 'required|in:piece,kg,liter,meter,box,pack',
-            'purchase_price' => 'required|numeric|min:0',
-            'selling_price' => 'required|numeric|min:0',
-            'minimum_price' => 'nullable|numeric|min:0',
-            'tva_rate' => 'required|in:19,13,7,0',
-            'stock_alert_threshold' => 'nullable|numeric|min:0',
-            'track_stock' => 'boolean',
-            'is_active' => 'boolean',
-        ]);
+        $product = Product::create($request->validated());
 
-        $product = Product::create($validated);
-
-        return response()->json($product->load('category'), 201);
+        return new ProductResource($product->load('category'));
     }
 
     public function show(Product $product)
     {
-        return response()->json($product->load('category', 'stocks.warehouse'));
+        return new ProductResource($product->load('category', 'stocks.warehouse'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'code' => 'sometimes|string|unique:products,code,' . $product->id,
-            'barcode' => 'nullable|string|unique:products,barcode,' . $product->id,
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'category_id' => 'nullable|exists:categories,id',
-            'type' => 'sometimes|in:product,service',
-            'unit' => 'sometimes|in:piece,kg,liter,meter,box,pack',
-            'purchase_price' => 'sometimes|numeric|min:0',
-            'selling_price' => 'sometimes|numeric|min:0',
-            'minimum_price' => 'nullable|numeric|min:0',
-            'tva_rate' => 'sometimes|in:19,13,7,0',
-            'stock_alert_threshold' => 'nullable|numeric|min:0',
-            'track_stock' => 'boolean',
-            'is_active' => 'boolean',
-        ]);
+        $product->update($request->validated());
 
-        $product->update($validated);
-
-        return response()->json($product->load('category'));
+        return new ProductResource($product->load('category'));
     }
 
     public function destroy(Product $product)

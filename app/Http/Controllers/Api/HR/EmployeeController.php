@@ -2,6 +2,9 @@
 namespace App\Http\Controllers\Api\HR;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\HR\StoreEmployeeRequest;
+use App\Http\Requests\HR\UpdateEmployeeRequest;
+use App\Http\Resources\HR\EmployeeResource;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
@@ -30,41 +33,19 @@ class EmployeeController extends Controller
 
         $employees = $query->latest()->paginate($request->per_page ?? 15);
 
-        return response()->json($employees);
+        return EmployeeResource::collection($employees);
     }
 
-    public function store(Request $request)
+    public function store(StoreEmployeeRequest $request)
     {
-        $validated = $request->validate([
-            'employee_number' => 'required|string|unique:employees,employee_number',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'cin' => 'required|string|unique:employees,cin',
-            'cnss_number' => 'nullable|string',
-            'birth_date' => 'nullable|date',
-            'gender' => 'nullable|in:male,female',
-            'marital_status' => 'nullable|in:single,married,divorced,widowed',
-            'children_count' => 'nullable|integer|min:0',
-            'is_family_head' => 'boolean',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'mobile' => 'nullable|string',
-            'address' => 'nullable|string',
-            'city' => 'nullable|string',
-            'department_id' => 'nullable|exists:departments,id',
-            'position_id' => 'nullable|exists:positions,id',
-            'hire_date' => 'required|date',
-            'status' => 'required|in:active,on_leave,suspended,terminated',
-        ]);
+        $employee = Employee::create($request->validated());
 
-        $employee = Employee::create($validated);
-
-        return response()->json($employee->load('department', 'position'), 201);
+        return new EmployeeResource($employee->load('department', 'position'));
     }
 
     public function show(Employee $employee)
     {
-        return response()->json($employee->load([
+        return new EmployeeResource($employee->load([
             'department',
             'position',
             'activeContract',

@@ -2,6 +2,8 @@
 namespace App\Http\Controllers\Api\Stock;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Stock\StoreDocumentRequest;
+use App\Http\Resources\Stock\DocumentResource;
 use App\Models\Document;
 use App\Services\Compliance\TaxCalculator;
 use Illuminate\Http\Request;
@@ -42,29 +44,12 @@ class DocumentController extends Controller
 
         $documents = $query->latest('date')->paginate($request->per_page ?? 15);
 
-        return response()->json($documents);
+        return DocumentResource::collection($documents);
     }
 
-    public function store(Request $request)
+    public function store(StoreDocumentRequest $request)
     {
-        $validated = $request->validate([
-            'type' => 'required|in:quote,delivery_note,invoice,credit_note,purchase_order,purchase_invoice',
-            'number' => 'required|string|unique:documents,number',
-            'date' => 'required|date',
-            'due_date' => 'nullable|date',
-            'customer_id' => 'nullable|exists:customers,id',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'warehouse_id' => 'nullable|exists:warehouses,id',
-            'discount_rate' => 'nullable|numeric|min:0|max:100',
-            'note' => 'nullable|string',
-            'terms' => 'nullable|string',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.quantity' => 'required|numeric|min:0',
-            'lines.*.unit_price' => 'required|numeric|min:0',
-            'lines.*.tva_rate' => 'required|in:19,13,7,0',
-            'lines.*.discount_rate' => 'nullable|numeric|min:0|max:100',
-        ]);
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated) {
             // Calculate totals
@@ -124,13 +109,13 @@ class DocumentController extends Controller
                 ]);
             }
 
-            return response()->json($document->load('lines.product', 'customer', 'supplier'), 201);
+            return new DocumentResource($document->load('lines.product', 'customer', 'supplier'));
         });
     }
 
     public function show(Document $document)
     {
-        return response()->json($document->load('lines.product', 'customer', 'supplier', 'payments'));
+        return new DocumentResource($document->load('lines.product', 'customer', 'supplier', 'payments'));
     }
 
     public function destroy(Document $document)

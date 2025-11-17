@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'module.access' => \App\Http\Middleware\CheckModuleAccess::class,
+            'subscription.status' => \App\Http\Middleware\CheckSubscriptionStatus::class,
+            'tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -30,7 +30,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant.status', 'subscription.status'])->group(function () {
 
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ============================================
     // MODULE STOCK & FACTURATION
     // ============================================
-    Route::prefix('stock')->name('stock.')->group(function () {
+    Route::prefix('stock')->middleware('module.access:stock')->name('stock.')->group(function () {
 
         // Products
         Route::apiResource('products', ProductController::class);
@@ -93,7 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ============================================
     // MODULE CRM
     // ============================================
-    Route::prefix('crm')->name('crm.')->group(function () {
+    Route::prefix('crm')->middleware('module.access:crm')->name('crm.')->group(function () {
 
         // Contacts & Leads
         Route::apiResource('contacts', ContactController::class);
@@ -140,7 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ============================================
     // MODULE RH & PAIE
     // ============================================
-    Route::prefix('hr')->name('hr.')->group(function () {
+    Route::prefix('hr')->middleware('module.access:hr')->name('hr.')->group(function () {
 
         // Departments
         Route::apiResource('departments', \App\Http\Controllers\Api\HR\DepartmentController::class);
