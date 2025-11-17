@@ -17,4 +17,46 @@ class Product extends Model
     public function category(): BelongsTo { return $this->belongsTo(Category::class); }
     public function stocks(): HasMany { return $this->hasMany(Stock::class); }
     public function movements(): HasMany { return $this->hasMany(StockMovement::class); }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    public function scopeOfCategory($query, int $categoryId)
+    {
+        return $query->where('category_id', $categoryId);
+    }
+
+    public function scopeOfType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeTrackedStock($query)
+    {
+        return $query->where('track_stock', true);
+    }
+
+    public function scopeLowStock($query)
+    {
+        return $query->whereHas('stocks', function ($q) {
+            $q->whereRaw('quantity <= stock_alert_threshold');
+        });
+    }
+
+    public function scopeSearch($query, string $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('code', 'like', "%{$search}%")
+              ->orWhere('barcode', 'like', "%{$search}%");
+        });
+    }
 }

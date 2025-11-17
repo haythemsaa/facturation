@@ -18,4 +18,51 @@ class Document extends Model
     public function lines(): HasMany { return $this->hasMany(DocumentLine::class); }
     public function payments(): HasMany { return $this->hasMany(Payment::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
+
+    // Scopes
+    public function scopeOfType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeInvoices($query)
+    {
+        return $query->where('type', 'invoice');
+    }
+
+    public function scopeQuotes($query)
+    {
+        return $query->where('type', 'quote');
+    }
+
+    public function scopeValidated($query)
+    {
+        return $query->where('is_validated', true);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('payment_status', 'pending');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('payment_status', 'paid');
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('due_date', '<', now())
+            ->where('payment_status', '!=', 'paid');
+    }
+
+    public function scopeDateBetween($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('date', [$startDate, $endDate]);
+    }
+
+    public function scopeForCustomer($query, int $customerId)
+    {
+        return $query->where('customer_id', $customerId);
+    }
 }

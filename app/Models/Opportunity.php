@@ -19,4 +19,62 @@ class Opportunity extends Model
     public function assignedTo(): BelongsTo { return $this->belongsTo(User::class, 'assigned_to'); }
     public function activities(): HasMany { return $this->hasMany(Activity::class); }
     public function tags(): MorphToMany { return $this->morphToMany(Tag::class, 'taggable'); }
+
+    // Scopes
+    public function scopeOpen($query)
+    {
+        return $query->where('status', 'open');
+    }
+
+    public function scopeWon($query)
+    {
+        return $query->where('status', 'won');
+    }
+
+    public function scopeLost($query)
+    {
+        return $query->where('status', 'lost');
+    }
+
+    public function scopeOfStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeAssignedTo($query, int $userId)
+    {
+        return $query->where('assigned_to', $userId);
+    }
+
+    public function scopeInPipeline($query, int $pipelineId)
+    {
+        return $query->where('pipeline_id', $pipelineId);
+    }
+
+    public function scopeInStage($query, int $stageId)
+    {
+        return $query->where('stage_id', $stageId);
+    }
+
+    public function scopeHighValue($query, float $minValue = 10000)
+    {
+        return $query->where('value', '>=', $minValue);
+    }
+
+    public function scopeHighProbability($query, int $minProbability = 70)
+    {
+        return $query->where('probability', '>=', $minProbability);
+    }
+
+    public function scopeClosingSoon($query, int $days = 30)
+    {
+        return $query->where('status', 'open')
+            ->whereBetween('expected_close_date', [now(), now()->addDays($days)]);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('status', 'open')
+            ->where('expected_close_date', '<', now());
+    }
 }
