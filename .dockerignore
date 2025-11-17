@@ -1,0 +1,50 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+/tests
+/.phpunit.cache
+phpunit.xml
+
+# Documentation
+README.md
+GETTING_STARTED.md
+API_DOCUMENTATION.md
+COMPETITIVE_ANALYSIS.md
+postman_collection.json
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Logs
+*.log
+/storage/logs/*

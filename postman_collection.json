@@ -1,0 +1,583 @@
+{
+	"info": {
+		"_postman_id": "tunisbusiness-suite-api",
+		"name": "TunisBusiness Suite API",
+		"description": "Collection complète pour tester l'API TunisBusiness Suite - SaaS de gestion pour PME tunisiennes.\n\n## Authentification\nLa plupart des endpoints nécessitent un Bearer Token obtenu via `/api/login`.\n\n## Variables d'environnement\n- `base_url`: http://localhost:8000\n- `token`: Bearer token obtenu après login\n- `tenant_id`: ID du tenant actif\n\n## Comptes de test\n- **Starter**: admin@starter.tunisbusiness.tn / password\n- **Business**: admin@business.tunisbusiness.tn / password  \n- **Enterprise**: admin@enterprise.tunisbusiness.tn / password",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Company\",\n    \"email\": \"test@example.tn\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\",\n    \"company_name\": \"Test Company SARL\",\n    \"plan\": \"business\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@enterprise.tunisbusiness.tn\",\n    \"password\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Health & Monitoring",
+			"item": [
+				{
+					"name": "Basic Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						}
+					}
+				},
+				{
+					"name": "Detailed Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health/detailed",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health", "detailed"]
+						}
+					}
+				},
+				{
+					"name": "System Metrics",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health/metrics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health", "metrics"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notifications?unread_only=false",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications"],
+							"query": [
+								{
+									"key": "unread_only",
+									"value": "false"
+								},
+								{
+									"key": "type",
+									"value": "invoice_paid",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/unread-count",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "unread-count"]
+						}
+					}
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/:id/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", ":id", "read"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "notification-uuid"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/mark-all-read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "mark-all-read"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Stock & Facturation",
+			"item": [
+				{
+					"name": "Products",
+					"item": [
+						{
+							"name": "List Products",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/stock/products",
+									"host": ["{{base_url}}"],
+									"path": ["api", "stock", "products"]
+								}
+							}
+						},
+						{
+							"name": "Create Product",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Produit Test\",\n    \"reference\": \"PROD-001\",\n    \"category_id\": 1,\n    \"sale_price\": 150.000,\n    \"purchase_price\": 100.000,\n    \"tva_rate\": 19.00,\n    \"track_stock\": true,\n    \"unit\": \"pcs\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/stock/products",
+									"host": ["{{base_url}}"],
+									"path": ["api", "stock", "products"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Documents",
+					"item": [
+						{
+							"name": "List Documents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/stock/documents?type=invoice&status=validated",
+									"host": ["{{base_url}}"],
+									"path": ["api", "stock", "documents"],
+									"query": [
+										{
+											"key": "type",
+											"value": "invoice"
+										},
+										{
+											"key": "status",
+											"value": "validated"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Validate Document",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/stock/documents/:id/validate",
+									"host": ["{{base_url}}"],
+									"path": ["api", "stock", "documents", ":id", "validate"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CRM",
+			"item": [
+				{
+					"name": "Contacts",
+					"item": [
+						{
+							"name": "List Contacts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/crm/contacts",
+									"host": ["{{base_url}}"],
+									"path": ["api", "crm", "contacts"]
+								}
+							}
+						},
+						{
+							"name": "Create Contact",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Ahmed Ben Ali\",\n    \"email\": \"ahmed@example.tn\",\n    \"phone\": \"+216 20 123 456\",\n    \"company\": \"Tech Solutions SARL\",\n    \"type\": \"lead\",\n    \"source\": \"website\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/crm/contacts",
+									"host": ["{{base_url}}"],
+									"path": ["api", "crm", "contacts"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Opportunities",
+					"item": [
+						{
+							"name": "List Opportunities",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/crm/opportunities",
+									"host": ["{{base_url}}"],
+									"path": ["api", "crm", "opportunities"]
+								}
+							}
+						},
+						{
+							"name": "Mark as Won",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"won_reason\": \"Prix compétitif\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/crm/opportunities/:id/win",
+									"host": ["{{base_url}}"],
+									"path": ["api", "crm", "opportunities", ":id", "win"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "HR & Paie",
+			"item": [
+				{
+					"name": "Employees",
+					"item": [
+						{
+							"name": "List Employees",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/hr/employees",
+									"host": ["{{base_url}}"],
+									"path": ["api", "hr", "employees"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Payslips",
+					"item": [
+						{
+							"name": "List Payslips",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/hr/payslips?year=2025&month=1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "hr", "payslips"],
+									"query": [
+										{
+											"key": "year",
+											"value": "2025"
+										},
+										{
+											"key": "month",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Validate Payslip",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/hr/payslips/:id/validate",
+									"host": ["{{base_url}}"],
+									"path": ["api", "hr", "payslips", ":id", "validate"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Exports",
+			"item": [
+				{
+					"name": "Export Document PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/export/document/:id/pdf?template_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "export", "document", ":id", "pdf"],
+							"query": [
+								{
+									"key": "template_id",
+									"value": "1"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Export Sales Excel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/export/sales/excel?start_date=2025-01-01&end_date=2025-01-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "export", "sales", "excel"],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-01-31"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Export Stock Excel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/export/stock/excel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "export", "stock", "excel"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Audit Logs",
+			"item": [
+				{
+					"name": "List Audit Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/audit-logs?event=created&user_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "audit-logs"],
+							"query": [
+								{
+									"key": "event",
+									"value": "created"
+								},
+								{
+									"key": "user_id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
