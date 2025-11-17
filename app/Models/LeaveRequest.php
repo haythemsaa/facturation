@@ -1,0 +1,17 @@
+<?php
+namespace App\Models;
+use App\Traits\BelongsToTenant;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class LeaveRequest extends Model
+{
+    use HasFactory, SoftDeletes, BelongsToTenant;
+    protected $fillable = ['tenant_id', 'employee_id', 'leave_type_id', 'start_date', 'end_date', 'days_count', 'reason', 'document', 'status', 'approved_by', 'approved_at', 'rejection_reason'];
+    protected $casts = ['start_date' => 'date', 'end_date' => 'date', 'days_count' => 'decimal:1', 'approved_at' => 'datetime'];
+    public function employee(): BelongsTo { return $this->belongsTo(Employee::class); }
+    public function leaveType(): BelongsTo { return $this->belongsTo(LeaveType::class); }
+    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
+}
