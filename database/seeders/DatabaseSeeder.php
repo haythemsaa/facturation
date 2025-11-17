@@ -93,6 +93,13 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Call additional seeders
+        $this->command->info('📋 Creating tenant settings and document templates...');
+        $this->call([
+            TenantSettingsSeeder::class,
+            DocumentTemplateSeeder::class,
+        ]);
+
         $this->command->info('✅ Database seeded successfully!');
     }
 

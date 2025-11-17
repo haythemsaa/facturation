@@ -16,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'module.access' => \App\Http\Middleware\CheckModuleAccess::class,
             'subscription.status' => \App\Http\Middleware\CheckSubscriptionStatus::class,
             'tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,
+            'locale' => \App\Http\Middleware\SetLocale::class,
+            'api.throttle' => \App\Http\Middleware\ApiRateLimiter::class,
+        ]);
+
+        // Apply SetLocale to all API routes
+        $middleware->api(prepend: [
+            \App\Http\Middleware\SetLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

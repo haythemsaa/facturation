@@ -18,6 +18,10 @@ use App\Http\Controllers\Api\HR\PayslipController;
 use App\Http\Controllers\Api\HR\AttendanceController;
 use App\Http\Controllers\Api\HR\LeaveRequestController;
 use App\Http\Controllers\Api\HR\DeclarationController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\ExportController;
+use App\Http\Controllers\Api\HealthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -236,4 +240,49 @@ Route::middleware(['auth:sanctum', 'tenant.status', 'subscription.status'])->gro
 
         Route::get('/subscription', [\App\Http\Controllers\Api\Admin\SubscriptionController::class, 'show']);
     });
+
+    // ============================================
+    // NOTIFICATIONS
+    // ============================================
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/{id}', [NotificationController::class, 'destroy']);
+    });
+
+    // ============================================
+    // AUDIT LOGS
+    // ============================================
+    Route::prefix('audit-logs')->middleware('role:admin')->name('audit.')->group(function () {
+        Route::get('/', [AuditLogController::class, 'index']);
+        Route::get('/{auditLog}', [AuditLogController::class, 'show']);
+    });
+
+    // ============================================
+    // EXPORTS (PDF & EXCEL)
+    // ============================================
+    Route::prefix('export')->name('export.')->group(function () {
+        // PDF Exports
+        Route::get('/document/{id}/pdf', [ExportController::class, 'exportDocumentPdf']);
+        Route::post('/bulk-pdf', [ExportController::class, 'exportBulkPdf']);
+
+        // Excel Exports
+        Route::get('/sales/excel', [ExportController::class, 'exportSalesExcel']);
+        Route::get('/stock/excel', [ExportController::class, 'exportStockExcel']);
+        Route::get('/contacts/excel', [ExportController::class, 'exportContactsExcel']);
+        Route::get('/opportunities/excel', [ExportController::class, 'exportOpportunitiesExcel']);
+        Route::get('/employees/excel', [ExportController::class, 'exportEmployeesExcel']);
+        Route::get('/audit-logs/excel', [ExportController::class, 'exportAuditLogsExcel']);
+    });
+});
+
+// ============================================
+// HEALTH & MONITORING (Public - No Auth)
+// ============================================
+Route::prefix('health')->name('health.')->group(function () {
+    Route::get('/', [HealthController::class, 'index']);
+    Route::get('/detailed', [HealthController::class, 'detailed']);
+    Route::get('/metrics', [HealthController::class, 'metrics']);
 });
