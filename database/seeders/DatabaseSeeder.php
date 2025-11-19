@@ -100,7 +100,42 @@ class DatabaseSeeder extends Seeder
             DocumentTemplateSeeder::class,
         ]);
 
+        // Seed Webhooks and Notifications for demo
+        $this->command->info('🔔 Creating webhooks and notifications...');
+        $this->seedWebhooksAndNotifications();
+
         $this->command->info('✅ Database seeded successfully!');
+    }
+
+    private function seedWebhooksAndNotifications(): void
+    {
+        $tenants = Tenant::all();
+
+        foreach ($tenants as $tenant) {
+            // Create 2-3 webhooks per tenant
+            \App\Models\Webhook::factory(rand(2, 3))->create([
+                'tenant_id' => $tenant->id,
+            ]);
+
+            // Create notifications for users
+            $users = User::where('tenant_id', $tenant->id)->get();
+
+            foreach ($users as $user) {
+                // Create 5-10 notifications per user (mix of read/unread)
+                $notificationCount = rand(5, 10);
+
+                for ($i = 0; $i < $notificationCount; $i++) {
+                    \App\Models\Notification::factory()->create([
+                        'tenant_id' => $tenant->id,
+                        'notifiable_type' => User::class,
+                        'notifiable_id' => $user->id,
+                        'read_at' => rand(0, 100) < 40 ? now()->subHours(rand(1, 48)) : null,
+                    ]);
+                }
+            }
+        }
+
+        $this->command->info('  ✅ Created webhooks and notifications');
     }
 
     private function createRolesAndPermissions(): void
